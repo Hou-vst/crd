@@ -1,0 +1,8 @@
+apiVersion: extensions.example.com/v1
+kind: Website
+metadata:
+  name: crd-http-svr
+spec:
+  host: crd.localdev.me 
+  image: lucienhou/httpsvr:v1
+  insNum: 2
