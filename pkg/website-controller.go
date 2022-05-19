@@ -8,7 +8,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
-	"v1"
+	"github.com/Hou-vst/crd/pkg/v1"
 )
 
 func main() {
