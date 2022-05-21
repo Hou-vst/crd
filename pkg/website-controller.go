@@ -11,6 +11,8 @@ import (
 	"github.com/Hou-vst/crd/pkg/v1"
 )
 
+var templateDir string = "/app/template/"
+
 func main() {
 	log.Println("website-controller started.")
 	for {
@@ -42,13 +44,15 @@ func main() {
 }
 
 func createWebsite(website v1.Website) {
-	createResource(website, "api/v1", "services", "service-template.json")
-	createResource(website, "apis/extensions/v1beta1", "deployments", "deployment-template.json")
+	createResource(website, "v1", "services" ,fmt.Sprintf("%s%s",templateDir,"service-template.json"))
+	createResource(website, "apps/v1", "deployments", fmt.Sprintf("%s%s",templateDir,"deployment-template.json"))
+	createResource(website, "networking.k8s.io/v1", "ingress", fmt.Sprintf("%s%s",templateDir,"ingress-template.json"))
 }
 
 func deleteWebsite(website v1.Website) {
-	deleteResource(website, "api/v1", "services", getName(website))
-	deleteResource(website, "apis/extensions/v1beta1", "deployments", getName(website))
+	deleteResource(website, "v1", "services", getName(website))
+	deleteResource(website, "apps/v1", "deployments", getName(website))
+	deleteResource(website, "networking.k8s.io/v1", "ingress", getName(website))
 }
 
 func createResource(webserver v1.Website, apiGroup string, kind string, filename string) {
@@ -58,7 +62,9 @@ func createResource(webserver v1.Website, apiGroup string, kind string, filename
 		log.Fatal(err)
 	}
 	template := strings.Replace(string(templateBytes), "[NAME]", getName(webserver), -1)
-	template = strings.Replace(template, "[GIT-REPO]", webserver.Spec.GitRepo, -1)
+	template = strings.Replace(template, "[NUM]", webserver.Spec.GitRepo, -1)
+	template = strings.Replace(template, "[IMAGE-NAME]", webserver.Spec.GitRepo, -1)
+	template = strings.Replace(template, "[HOST-NAME]", webserver.Spec.GitRepo, -1)
 
 	resp, err := http.Post(fmt.Sprintf("http://localhost:8001/%s/namespaces/%s/%s/", apiGroup, webserver.Metadata.Namespace, kind), "application/json", strings.NewReader(template))
 	if err != nil {
