@@ -1,17 +1,30 @@
 package v1
 
+import (
+	"k8s.io/apimachinery/pkg/runtime/schema"
+)
+
+var gvr = schema.GroupVersionResource{
+	Group:    "extensions.example.com",
+	Version:  "v1",
+	Resource: "websites",
+}
+
+
 type Metadata struct {
-	Name string
-	Namespace string
+	Name string 		`json:"name"`
+	Namespace string	`json:"namespace"`
 }
 
 type WebsiteSpec struct {
-	GitRepo string
+	Host string			`json:"host"`
+	Image string		`json:"image"`
+	InsNum int			`json:"insNum"`
 }
 
 type Website struct {
-	Metadata Metadata
-	Spec WebsiteSpec
+	Metadata Metadata		`json:"metadata"`
+	Spec WebsiteSpec		`json:"spec"`
 }
 
 type WebsiteWatchEvent struct {
