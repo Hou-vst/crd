@@ -62,7 +62,7 @@ func createResource(webserver v1.Website, apiGroup string, kind string, filename
 		log.Fatal(err)
 	}
 	template := strings.Replace(string(templateBytes), "[NAME]", getName(webserver), -1)
-	template = strings.Replace(template, "[NUM]", webserver.Spec.InsNum, -1)
+	template = strings.Replace(template, "[NUM]", fmt.Sprint(webserver.Spec.InsNum), -1)
 	template = strings.Replace(template, "[IMAGE-NAME]", webserver.Spec.Image, -1)
 	template = strings.Replace(template, "[HOST-NAME]", webserver.Spec.Host, -1)
 
