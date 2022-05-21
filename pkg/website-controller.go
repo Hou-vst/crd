@@ -31,7 +31,7 @@ func main() {
 				log.Fatal(err)
 			}
 
-			log.Printf("Received watch event: %s: %s: %s\n", event.Type, event.Object.Metadata.Name, event.Object.Spec.GitRepo)
+			log.Printf("Received watch event: %s: %v\n", event.Type, event.Object)
 
 			if event.Type == "ADDED" {
 				createWebsite(event.Object)
@@ -62,9 +62,9 @@ func createResource(webserver v1.Website, apiGroup string, kind string, filename
 		log.Fatal(err)
 	}
 	template := strings.Replace(string(templateBytes), "[NAME]", getName(webserver), -1)
-	template = strings.Replace(template, "[NUM]", webserver.Spec.GitRepo, -1)
-	template = strings.Replace(template, "[IMAGE-NAME]", webserver.Spec.GitRepo, -1)
-	template = strings.Replace(template, "[HOST-NAME]", webserver.Spec.GitRepo, -1)
+	template = strings.Replace(template, "[NUM]", webserver.Spec.InsNum, -1)
+	template = strings.Replace(template, "[IMAGE-NAME]", webserver.Spec.Image, -1)
+	template = strings.Replace(template, "[HOST-NAME]", webserver.Spec.Host, -1)
 
 	resp, err := http.Post(fmt.Sprintf("http://localhost:8001/%s/namespaces/%s/%s/", apiGroup, webserver.Metadata.Namespace, kind), "application/json", strings.NewReader(template))
 	if err != nil {
