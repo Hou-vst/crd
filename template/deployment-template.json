@@ -1,36 +1,36 @@
 {
-    "apiVersion": "apps/v1",
-    "kind": "Deployment",
-    "metadata": {
-      "name": "[NAME]"
+  "apiVersion": "apps/v1",
+  "kind": "Deployment",
+  "metadata": {
+    "name": "[NAME]"
+  },
+  "spec": {
+    "selector": {
+      "matchLabels": {
+        "run": "[NAME]"
+      }
     },
-    "spec": {
-      "selector": {
-        "matchLabels": {
+    "replicas": [NUM],
+    "template": {
+      "metadata": {
+        "labels": {
           "run": "[NAME]"
         }
       },
-      "replicas": "[NUM]",
-      "template": {
-        "metadata": {
-          "labels": {
-            "run": "[NAME]"
+      "spec": {
+        "containers": [
+          {
+      "name": "[NAME]",
+            "image": "[IMAGE-NAME]",    
+            "imagePullPolicy": "Never",
+            "ports": [
+              {
+                "containerPort": 8080
+              }
+            ]
           }
-        },
-        "spec": {
-          "containers": [
-            {
-	      "name": "[NAME]",
-              "image": "[IMAGE-NAME]",    
-              "imagePullPolicy": "Never",
-              "ports": [
-                {
-                  "containerPort": 8080
-                }
-              ]
-            }
-          ]
-        }
+        ]
       }
     }
+  }
 }

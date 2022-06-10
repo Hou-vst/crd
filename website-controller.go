@@ -11,12 +11,13 @@ import (
 	"github.com/Hou-vst/crd/pkg/v1"
 )
 
-var templateDir string = "/app/template/"
+var templateDir string = "./template/"
+var destIpAndPort string = "localhost:8001"
 
 func main() {
-	log.Println("website-controller started.")
+	log.Println("website-controller started.templateDir:",templateDir,",destIpAndPort:",destIpAndPort)
 	for {
-		resp, err := http.Get("http://localhost:8001/apis/extensions.example.com/v1/websites?watch=true")
+		resp, err := http.Get(fmt.Sprintf("http://%s/apis/extensions.example.com/v1/websites?watch=true",destIpAndPort))
 		if err != nil {
 			panic(err)
 		}
@@ -44,15 +45,15 @@ func main() {
 }
 
 func createWebsite(website v1.Website) {
-	createResource(website, "v1", "services" ,fmt.Sprintf("%s%s",templateDir,"service-template.json"))
-	createResource(website, "apps/v1", "deployments", fmt.Sprintf("%s%s",templateDir,"deployment-template.json"))
-	createResource(website, "networking.k8s.io/v1", "ingress", fmt.Sprintf("%s%s",templateDir,"ingress-template.json"))
+	createResource(website, "api/v1", "services" ,fmt.Sprintf("%s%s",templateDir,"service-template.json"))
+	createResource(website, "apis/apps/v1", "deployments", fmt.Sprintf("%s%s",templateDir,"deployment-template.json"))
+	createResource(website, "apis/networking.k8s.io/v1", "ingresses", fmt.Sprintf("%s%s",templateDir,"ingress-template.json"))
 }
 
 func deleteWebsite(website v1.Website) {
-	deleteResource(website, "v1", "services", getName(website))
-	deleteResource(website, "apps/v1", "deployments", getName(website))
-	deleteResource(website, "networking.k8s.io/v1", "ingress", getName(website))
+	deleteResource(website, "api/v1", "services", getName(website))
+	deleteResource(website, "apis/apps/v1", "deployments", getName(website))
+	deleteResource(website, "apis/networking.k8s.io/v1", "ingresses", getName(website))
 }
 
 func createResource(webserver v1.Website, apiGroup string, kind string, filename string) {
@@ -66,20 +67,32 @@ func createResource(webserver v1.Website, apiGroup string, kind string, filename
 	template = strings.Replace(template, "[IMAGE-NAME]", webserver.Spec.Image, -1)
 	template = strings.Replace(template, "[HOST-NAME]", webserver.Spec.Host, -1)
 
-	resp, err := http.Post(fmt.Sprintf("http://localhost:8001/%s/namespaces/%s/%s/", apiGroup, webserver.Metadata.Namespace, kind), "application/json", strings.NewReader(template))
+	log.Println("createResource template :", template)
+
+	url := fmt.Sprintf("http://%s/%s/namespaces/%s/%s/",destIpAndPort ,apiGroup, webserver.Metadata.Namespace, kind)
+	contentType := "application/json"
+	body := strings.NewReader(template)
+	resp, err := http.Post(url,contentType,body)
+	log.Println("createResource url :", url)
+	log.Println("createResource contentType :", contentType)
+
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer resp.Body.Close()
 	log.Println("response Status:", resp.Status)
 }
 
 func deleteResource(webserver v1.Website, apiGroup string, kind string, name string) {
 	log.Printf("Deleting %s with name %s in namespace %s", kind, name, webserver.Metadata.Namespace)
-	req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf("http://localhost:8001/%s/namespaces/%s/%s/%s", apiGroup, webserver.Metadata.Namespace, kind, name), nil)
+	url := fmt.Sprintf("http://%s/%s/namespaces/%s/%s/%s",destIpAndPort ,apiGroup, webserver.Metadata.Namespace, kind, name)
+	log.Println("deleteResource url :", url)
+	req, err := http.NewRequest(http.MethodDelete, url, nil)
 	if err != nil {
 		log.Fatal(err)
 		return
 	}
+	
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		log.Fatal(err)

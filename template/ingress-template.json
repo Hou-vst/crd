@@ -9,7 +9,7 @@
         "rules": [
             {
                 "host": "[HOST-NAME]",
-	            "http": {
+                "http": {
                     "paths": [
                         {
                             "path": "/",
@@ -18,13 +18,13 @@
                                 "service": {
                                     "name": "[NAME]",
                                     "port": {
-                                        "number": "80"
+                                        "number": 80
                                     }
                                 }
                             }
                         }
                     ]
-	            }
+                }
             }
         ]
     }
